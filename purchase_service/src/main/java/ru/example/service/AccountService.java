@@ -3,10 +3,14 @@ package ru.example.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.example.exception.AccountDoesNotExistException;
+import ru.example.exception.NotEnoughMoneyException;
 import ru.example.model.*;
 import ru.example.repository.AccountRepository;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Log4j2
 @Service
@@ -30,13 +34,35 @@ public class AccountService implements AccountCreation, AccountMoneyOperations {
     }
 
     @Override
-    public void withdrawMoney(Long id, BigDecimal amount) {
-        // todo
+    @Transactional
+    public void withdrawMoney(Long accountId, BigDecimal amountToSubtract) {
+
+        Optional<Account> optionalAccount = accountRepository.findById(accountId);
+
+        if (optionalAccount.isEmpty()) {
+            throw new AccountDoesNotExistException(String.format("error - account does not exists (account_id:%d)", accountId));
+        }
+
+        Account account = optionalAccount.get();
+
+        BigDecimal remainder = account.getAmount().subtract(amountToSubtract);
+        if (remainder.compareTo(BigDecimal.ZERO) < 0) {
+            throw new NotEnoughMoneyException(String.format("error - not enough money (account_id:%d)", accountId));
+        }
+        account.setAmount(remainder);
+        accountRepository.save(account);
     }
 
     @Override
-    public void addMoney(Long id, BigDecimal amount) {
-        // todo
+    @Transactional
+    public void addMoney(Long accountId, BigDecimal amountToAdd) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountDoesNotExistException(String.format("error - account does not exists (account_id:%d)", accountId)));
+
+        BigDecimal remainder = account.getAmount().add(amountToAdd);
+        account.setAmount(remainder);
+        accountRepository.save(account);
     }
 
 }

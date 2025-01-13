@@ -1,10 +1,17 @@
+application:
+  kafka:
+    topic:
+      purchase-created: purchase-created
+      purchase-canceled: purchase-canceled
+
 server:
   port: 8081
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/saga_cashback
-    username: adm
-    password: adm
+    username: postgres
+    password: postgres
     driver-class-name: org.postgresql.Driver
     jpa:
       hibernate:
@@ -15,7 +22,6 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
   jpa:
     hibernate:
       ddl-auto: create

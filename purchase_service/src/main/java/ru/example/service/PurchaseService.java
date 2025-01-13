@@ -3,30 +3,38 @@ package ru.example.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.example.exception.SendDataToKafkaException;
 import ru.example.model.Purchase;
 import ru.example.model.PurchaseEvent;
 import ru.example.model.PurchaseRequest;
-import ru.example.repo.PurchaseRepository;
+import ru.example.repository.PurchaseRepository;
+import ru.example.sender.DataSender;
 
+import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadLocalRandom;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class PurchaseService {
 
     private final ObjectMapper objectMapper;
-
     private final PurchaseRepository purchaseRepository;
+    private final AccountMoneyOperations  accountService;
+    private final Map<String, DataSender> dataSenders;
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    @Transactional
+    public void create(PurchaseRequest purchase) throws SendDataToKafkaException, JsonProcessingException, InterruptedException {
 
-    public Purchase createPurchase(PurchaseRequest purchase) throws InterruptedException, JsonProcessingException, ExecutionException {
         simulateDelay();
 
-        Purchase purchaseEntity = new Purchase();
+        accountService.withdrawMoney(purchase.getAccountId(), purchase.getAmount());
+
+        Purchase purchaseEntity = new Purchase(); // todo заменить на map struct
         purchaseEntity.setAmount(purchase.getAmount());
         purchaseEntity.setProductName(purchase.getProductName());
         purchaseEntity.setCanceled(false);
@@ -34,29 +42,35 @@ public class PurchaseService {
         Purchase save = purchaseRepository.save(purchaseEntity);
 
         simulateDelay();
+
+        if (ThreadLocalRandom.current().nextInt(1, 4) == 3) {
+            log.info("Random error - error while sending msg (message id:{}) to kafka...", save.getId());
+            throw new SendDataToKafkaException("error while sending data to kafka");
+        }
+
         PurchaseEvent event = new PurchaseEvent();
-        event.setAccountId(save.getId());
+        event.setAccountId(save.getAccountId());
         event.setAmount(save.getAmount());
 
-        kafkaTemplate.send("purchase_create", objectMapper.writeValueAsString(event)).get();
-        simulateDelay();
+        dataSenders.get("purchaseCreated").send(save.getId(), objectMapper.writeValueAsString(event));
 
-        return save;
+        simulateDelay();
     }
 
-    public void cancel(Long id) throws InterruptedException, JsonProcessingException, ExecutionException {
+    public void cancel(Long id) throws JsonProcessingException, InterruptedException {
+
         simulateDelay();
 
-        Purchase purchaseCancel = purchaseRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Покупка не найдена")
-        );
+        Purchase canceledPurchase = purchaseRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("Покупка не найдена"));
 
-        if (purchaseCancel.isCanceled()) {
+        accountService.addMoney(canceledPurchase.getAccountId(), canceledPurchase.getAmount());
+
+        if (canceledPurchase.isCanceled()) {
             throw new RuntimeException("Покупка уже отменена ожидайте возврата средств");
         }
-        purchaseCancel.setCanceled(true);
-        Purchase save = purchaseRepository.save(purchaseCancel);
-
+        canceledPurchase.setCanceled(true);
+        Purchase save = purchaseRepository.save(canceledPurchase);
 
         PurchaseEvent event = new PurchaseEvent();
         event.setAccountId(save.getId());
@@ -64,14 +78,12 @@ public class PurchaseService {
 
         simulateDelay();
 
-        kafkaTemplate.send("purchase_cancel", objectMapper.writeValueAsString(event)).get();
-
-
+        dataSenders.get("purchaseCanceled").send(save.getId(), objectMapper.writeValueAsString(event));
     }
 
     private void simulateDelay() throws InterruptedException {
         int delay = new Random().nextInt(10_000); // do 10 sec
-        System.out.println("Идет расчет в банке который хранит твою денежку ждать " + delay + "скунд");
+        System.out.println("Идет расчет в банке который хранит твою денежку ждать " + delay + "секунд");
         Thread.sleep(delay);
     }
 }
