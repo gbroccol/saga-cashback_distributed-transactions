@@ -1,15 +1,18 @@
 application:
   kafka:
     topic:
-      purchase-created: purchase-created
-      purchase-canceled: purchase-canceled
+      purchase-creating: purchase_creating
+      purchase-created: purchase_created
+      purchase-rejected: purchase_rejected
+      purchase-canceling: purchase_canceling
+      purchase-canceled: purchase_canceled
 
 server:
   port: 8081
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/saga_cashback
+    url: jdbc:postgresql://localhost:5433/saga # todo rename -> purchase + another host
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
