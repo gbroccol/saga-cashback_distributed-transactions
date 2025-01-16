@@ -52,7 +52,7 @@ public class AccountService {
 
         BigDecimal remainder = account.getBalance().subtract(amount);
         if (remainder.compareTo(BigDecimal.ZERO) < 0) {
-            throw new NotEnoughMoneyException(String.format("not enough money (account_id:%d)", accountId)); // todo общий вид ошибок русский или анг
+            throw new NotEnoughMoneyException(String.format("not enough money (account_id:%d)", accountId));
         }
         account.setBalance(remainder);
         accountRepository.save(account);

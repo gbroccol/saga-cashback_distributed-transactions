@@ -3,7 +3,7 @@ services:
   postgres-purchase:
     image: postgres:14.8-alpine3.18
     environment:
-      POSTGRES_DB: "saga" # todo rename purchase (нужны 2 БД)
+      POSTGRES_DB: "purchase"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
     volumes:
@@ -11,17 +11,16 @@ services:
     ports:
       - "5433:5432"
 
-# todo пыталась разнести таблицы по 2м БД, но не получается запустить 2 БД на докере
-#  postgres-account:
-#    image: postgres:14.8-alpine3.18
-#    environment:
-#      POSTGRES_DB: "account"
-#      POSTGRES_USER: "postgres"
-#      POSTGRES_PASSWORD: "postgres"
-#    volumes:
-#      - .:/docker-entrypoint-initdb.d
-#    ports:
-#      - "5435:5435"
+  postgres-account:
+    image: postgres:14.8-alpine3.18
+    environment:
+      POSTGRES_DB: "account"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    volumes:
+      - .:/docker-entrypoint-initdb.d
+    ports:
+      - "5434:5432"
 
   # система конфигурации (хранит информацию о топиках, партициях и тд)
   zookeeper:

@@ -60,7 +60,7 @@ public class PurchaseEventListener {
             // начислить кэшбэк, если покупка не отменена
             accountService.addCashBack(purchaseEvent.accountId(), purchaseEvent.amount());
         } catch (AccountDoesNotExistException e) {
-            // todo log - можно закидывать в очередь и попробовать обработать позже
+            // todo можно закидывать в очередь и попробовать обработать позже или как такое лучше обрабатывать???
             throw new RuntimeException(e);
         }
 
@@ -82,7 +82,7 @@ public class PurchaseEventListener {
             // Возвращаем списанные средства и отменяем кэшбэк, если был начислен ранее
             accountService.cancelPurchase(purchaseEvent.accountId(), purchaseEvent.amount());
         } catch (AccountDoesNotExistException e) {
-            // todo log - можно закидывать в очередь и попробовать обработать позже
+            // todo можно закидывать в очередь и попробовать обработать позже или как такое лучше обрабатывать???
             return;
         }
 

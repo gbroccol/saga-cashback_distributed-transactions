@@ -12,7 +12,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/saga # todo ??? rename -> account + another host
+    url: jdbc:postgresql://localhost:5434/account
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -24,7 +24,7 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: account-group
-      auto-offset-reset: earliest
+      auto-offset-reset: earliest # todo
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
