@@ -21,7 +21,7 @@ public class Purchase {
 
     private BigDecimal amount;
 
-    @Enumerated
-    private PurchaseState state; // todo check in db
+    @Enumerated(EnumType.STRING)
+    private PurchaseState state;
 
 }
