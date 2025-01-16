@@ -15,6 +15,7 @@ import ru.example.purchase.sender.DataSender;
 
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Log4j2
 @Service
@@ -40,11 +41,10 @@ public class PurchaseService {
 
         simulateDelay();
 
-        // todo
-//        if (ThreadLocalRandom.current().nextInt(1, 4) == 3) {
-//            log.info("Random error - error while sending msg (message id:{}) to kafka...", save.getId());
-//            throw new SendDataToKafkaException("error while sending data to kafka");
-//        }
+        if (ThreadLocalRandom.current().nextInt(1, 4) == 3) {
+            log.info("Random error - error while sending msg (purchase id:{}) to kafka...", purchase.getId());
+            throw new SendDataToKafkaException("error while sending data to kafka (RANDOM ERROR)");
+        }
 
         PurchaseEvent event = new PurchaseEvent(purchase.getAccountId(), purchase.getId(), purchase.getAmount());
         dataSenders.get("purchaseCreating").send(purchase.getId(), objectMapper.writeValueAsString(event));
