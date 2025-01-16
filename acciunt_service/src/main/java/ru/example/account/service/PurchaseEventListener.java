@@ -26,14 +26,14 @@ public class PurchaseEventListener {
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
         System.out.printf("--------> Обработка покупки. Вычитаем денежные средства за покупку accountId:%d purchaseId:%d  %n",
-                purchaseEvent.getAccountId(),
-                purchaseEvent.getPurchaseId());
+                purchaseEvent.accountId(),
+                purchaseEvent.purchaseId());
 
         simulateDelay();
 
         try {
             // вычитаем сумму из баланса
-            accountService.withdrawMoney(purchaseEvent.getAccountId(), purchaseEvent.getAmount());
+            accountService.withdrawMoney(purchaseEvent.accountId(), purchaseEvent.amount());
         } catch (AccountDoesNotExistException | NotEnoughMoneyException e) {
             dataSenders.get("purchaseRejected").send(1L, objectMapper.writeValueAsString(purchaseEvent)); // todo переменные // todo 1L
             return;
@@ -53,12 +53,12 @@ public class PurchaseEventListener {
         simulateDelay();
 
         System.out.printf("--------> Обработка покупки. Начисляем кэшбэк за покупку accountId:%d purchaseId:%d  %n",
-                purchaseEvent.getAccountId(),
-                purchaseEvent.getPurchaseId());
+                purchaseEvent.accountId(),
+                purchaseEvent.purchaseId());
 
         try {
             // начислить кэшбэк, если покупка не отменена
-            accountService.addCashBack(purchaseEvent.getAccountId(), purchaseEvent.getAmount());
+            accountService.addCashBack(purchaseEvent.accountId(), purchaseEvent.amount());
         } catch (AccountDoesNotExistException e) {
             // todo log - можно закидывать в очередь и попробовать обработать позже
             throw new RuntimeException(e);
@@ -75,23 +75,19 @@ public class PurchaseEventListener {
         simulateDelay();
 
         System.out.printf("--------> Обработка отмены покупки. Возвращаем списанные средства и отменяем начисление кэшбэка accountId:%d purchaseId:%d %n",
-                purchaseEvent.getAccountId(),
-                purchaseEvent.getPurchaseId());
+                purchaseEvent.accountId(),
+                purchaseEvent.purchaseId());
 
         try {
             // Возвращаем списанные средства и отменяем кэшбэк, если был начислен ранее
-            accountService.cancelPurchase(purchaseEvent.getAccountId(), purchaseEvent.getAmount());
+            accountService.cancelPurchase(purchaseEvent.accountId(), purchaseEvent.amount());
         } catch (AccountDoesNotExistException e) {
             // todo log - можно закидывать в очередь и попробовать обработать позже
             return;
         }
 
         // Добавить событие в очередь операций, которые были успешно отменены
-        PurchaseEvent purchaseCancelEvent = new PurchaseEvent();
-        purchaseCancelEvent.setAccountId(purchaseEvent.getAccountId());
-        purchaseCancelEvent.setPurchaseId(purchaseEvent.getPurchaseId());
-        purchaseCancelEvent.setAmount(purchaseEvent.getAmount());
-        dataSenders.get("purchaseCanceled").send(1L, objectMapper.writeValueAsString(purchaseCancelEvent));
+        dataSenders.get("purchaseCanceled").send(1L, objectMapper.writeValueAsString(purchaseEvent));
 
         simulateDelay();
     }

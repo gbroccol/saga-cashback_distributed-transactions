@@ -17,19 +17,18 @@ public class PurchaseEventListener {
     private final ObjectMapper objectMapper;
     private final PurchaseService purchaseService;
 
-    // todo @Transactional
     @KafkaListener(topics = "purchase_created", groupId = "purchase-group")
     public void handlePurchaseCreated(String event) throws InterruptedException, JsonProcessingException {
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
         System.out.printf("--------> Обновляем статус покупки. Покупка прошла успешно accountId:%d purchaseId:%d  %n",
-                purchaseEvent.getAccountId(),
-                purchaseEvent.getPurchaseId());
+                purchaseEvent.accountId(),
+                purchaseEvent.purchaseId());
 
         simulateDelay();
 
         // обновить статус
-        purchaseService.setState(purchaseEvent.getPurchaseId(), PurchaseState.CREATED);
+        purchaseService.setState(purchaseEvent.purchaseId(), PurchaseState.CREATED);
 
         simulateDelay();
     }
@@ -39,13 +38,13 @@ public class PurchaseEventListener {
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
         System.out.printf("--------> Обновляем статус покупки. Покупка отклонена. Аккаунт не существует или на нем не достаточно средств accountId:%d purchaseId:%d  %n",
-                purchaseEvent.getAccountId(),
-                purchaseEvent.getPurchaseId());
+                purchaseEvent.accountId(),
+                purchaseEvent.purchaseId());
 
         simulateDelay();
 
         // обновить статус
-        purchaseService.setState(purchaseEvent.getPurchaseId(), PurchaseState.REJECTED);
+        purchaseService.setState(purchaseEvent.purchaseId(), PurchaseState.REJECTED);
 
         simulateDelay();
     }
@@ -55,13 +54,13 @@ public class PurchaseEventListener {
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
         System.out.printf("--------> Обновляем статус покупки. Покупка отменена успешно accountId:%d purchaseId:%d  %n",
-                purchaseEvent.getAccountId(),
-                purchaseEvent.getPurchaseId());
+                purchaseEvent.accountId(),
+                purchaseEvent.purchaseId());
 
         simulateDelay();
 
         // обновить статус
-        purchaseService.setState(purchaseEvent.getPurchaseId(), PurchaseState.CANCELED);
+        purchaseService.setState(purchaseEvent.purchaseId(), PurchaseState.CANCELED);
 
         simulateDelay();
     }

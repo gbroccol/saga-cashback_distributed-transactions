@@ -26,17 +26,17 @@ public class PurchaseService {
     private final Map<String, DataSender> dataSenders;
 
     @Transactional
-    public PurchaseResponse create(PurchaseRequest purchase) throws SendDataToKafkaException, JsonProcessingException, InterruptedException {
+    public PurchaseResponse create(PurchaseRequest purchaseRequest) throws SendDataToKafkaException, JsonProcessingException, InterruptedException {
 
         simulateDelay();
 
         Purchase purchaseEntity = new Purchase();
-        purchaseEntity.setAmount(purchase.getAmount());
-        purchaseEntity.setProductName(purchase.getProductName());
-        purchaseEntity.setState(PurchaseState.CREATING); // todo проверить работу на БД
-        purchaseEntity.setAccountId(purchase.getAccountId());
+        purchaseEntity.setAmount(purchaseRequest.getAmount());
+        purchaseEntity.setProductName(purchaseRequest.getProductName());
+        purchaseEntity.setState(PurchaseState.CREATING);
+        purchaseEntity.setAccountId(purchaseRequest.getAccountId());
 
-        Purchase save = purchaseRepository.save(purchaseEntity);
+        Purchase purchase = purchaseRepository.save(purchaseEntity);
 
         simulateDelay();
 
@@ -46,15 +46,12 @@ public class PurchaseService {
 //            throw new SendDataToKafkaException("error while sending data to kafka");
 //        }
 
-        PurchaseEvent event = new PurchaseEvent();
-        event.setAccountId(save.getAccountId());
-        event.setPurchaseId(save.getId());
-        event.setAmount(save.getAmount());
-
-        dataSenders.get("purchaseCreating").send(save.getId(), objectMapper.writeValueAsString(event));
+        PurchaseEvent event = new PurchaseEvent(purchase.getAccountId(), purchase.getId(), purchase.getAmount());
+        dataSenders.get("purchaseCreating").send(purchase.getId(), objectMapper.writeValueAsString(event));
 
         simulateDelay();
-        return new PurchaseResponse(save.getId(), save.getState());
+
+        return new PurchaseResponse(purchase.getId(), purchase.getState());
     }
 
     @Transactional
@@ -74,14 +71,11 @@ public class PurchaseService {
         purchase.setState(PurchaseState.CANCELING);
         purchase = purchaseRepository.save(purchase);
 
-        PurchaseEvent event = new PurchaseEvent();
-        event.setAccountId(purchase.getAccountId());
-        event.setPurchaseId(purchase.getId());
-        event.setAmount(purchase.getAmount());
+        PurchaseEvent event = new PurchaseEvent(purchase.getAccountId(), purchase.getId(), purchase.getAmount());
+        dataSenders.get("purchaseCanceling").send(purchase.getId(), objectMapper.writeValueAsString(event));
 
         simulateDelay();
 
-        dataSenders.get("purchaseCanceling").send(purchase.getId(), objectMapper.writeValueAsString(event));
         return new PurchaseResponse(purchase.getId(), purchase.getState());
     }
 
