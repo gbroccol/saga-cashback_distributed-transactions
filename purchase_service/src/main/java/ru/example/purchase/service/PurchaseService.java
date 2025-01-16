@@ -84,7 +84,6 @@ public class PurchaseService {
         return new PurchaseResponse(purchase.getId(), purchase.getState());
     }
 
-    @Transactional
     public void setState(Long id, PurchaseState purchaseState) {
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(
                 () -> new PurchaseDoesNotExistException(String.format("purchase does not exist (purchase_id:%d)", id)));
