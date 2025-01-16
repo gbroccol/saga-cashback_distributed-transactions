@@ -1,4 +1,4 @@
-package ru.example;
+package ru.example.account;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
