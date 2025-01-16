@@ -12,7 +12,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/saga # todo rename -> account + another host
+    url: jdbc:postgresql://localhost:5433/saga # todo ??? rename -> account + another host
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver

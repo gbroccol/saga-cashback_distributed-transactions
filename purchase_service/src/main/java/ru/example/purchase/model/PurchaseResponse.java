@@ -1,12 +1,6 @@
 package ru.example.purchase.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+public record PurchaseResponse(Long purchaseId,
+                               PurchaseState state) {
 
-@Data
-@AllArgsConstructor
-public class PurchaseResponse { // todo record
-
-    private Long purchaseId;
-    private PurchaseState state;
 }

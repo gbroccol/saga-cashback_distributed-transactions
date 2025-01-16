@@ -31,10 +31,10 @@ public class PurchaseService {
         simulateDelay();
 
         Purchase purchaseEntity = new Purchase();
-        purchaseEntity.setAmount(purchaseRequest.getAmount());
-        purchaseEntity.setProductName(purchaseRequest.getProductName());
+        purchaseEntity.setAmount(purchaseRequest.amount());
+        purchaseEntity.setProductName(purchaseRequest.productName());
         purchaseEntity.setState(PurchaseState.CREATING);
-        purchaseEntity.setAccountId(purchaseRequest.getAccountId());
+        purchaseEntity.setAccountId(purchaseRequest.accountId());
 
         Purchase purchase = purchaseRepository.save(purchaseEntity);
 

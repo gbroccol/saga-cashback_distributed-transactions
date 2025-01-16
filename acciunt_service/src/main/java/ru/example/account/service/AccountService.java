@@ -14,7 +14,6 @@ import ru.example.account.repo.AccountRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +29,11 @@ public class AccountService {
 
     public AccountResponse createAccount(AccountRequest request) {
 
-        if (request.getInitBalance().compareTo(BigDecimal.ZERO) < 0)
+        if (request.initBalance().compareTo(BigDecimal.ZERO) < 0)
             throw new InitBalanceLessThanZeroException("init balance can't be less than zero");
 
         Account account = new Account();
-        account.setBalance(request.getInitBalance());
+        account.setBalance(request.initBalance());
         account.setCashback(BigDecimal.ZERO);
         Account save = accountRepository.save(account);
         return new AccountResponse(save.getId(), save.getBalance(), save.getCashback());
