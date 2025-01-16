@@ -1,13 +1,13 @@
-package ru.example.controller;
+package ru.example.purchase.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.example.model.PurchaseRequest;
-import ru.example.model.PurchaseResponse;
-import ru.example.service.PurchaseService;
+import ru.example.purchase.model.PurchaseRequest;
+import ru.example.purchase.model.PurchaseResponse;
+import ru.example.purchase.service.PurchaseService;
 
 @RestController
 @RequestMapping("/api/v1/purchase")

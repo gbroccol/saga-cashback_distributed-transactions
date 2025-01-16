@@ -1,4 +1,4 @@
-package ru.example.model;
+package ru.example.account.model;
 
 import lombok.Data;
 
@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 public class PurchaseEvent {
 
     private Long accountId;
+
+    private Long purchaseId;
 
     private BigDecimal amount;
 }

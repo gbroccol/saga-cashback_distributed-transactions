@@ -1,4 +1,4 @@
-package ru.example.model;
+package ru.example.account.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

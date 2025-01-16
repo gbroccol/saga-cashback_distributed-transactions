@@ -1,4 +1,4 @@
-package ru.example.exception;
+package ru.example.account.exception;
 
 public class NotEnoughMoneyException extends Exception {
     public NotEnoughMoneyException(String message) {

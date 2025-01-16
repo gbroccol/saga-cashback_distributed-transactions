@@ -1,8 +1,8 @@
-package ru.example.sender;
+package ru.example.purchase.sender;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.core.KafkaTemplate;
-import ru.example.exception.SendDataToKafkaException;
+import ru.example.purchase.exception.SendDataToKafkaException;
 
 import java.util.concurrent.ExecutionException;
 

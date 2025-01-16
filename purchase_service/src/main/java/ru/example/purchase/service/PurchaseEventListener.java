@@ -1,12 +1,12 @@
-package ru.example.service;
+package ru.example.purchase.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import ru.example.model.PurchaseEvent;
-import ru.example.model.PurchaseState;
+import ru.example.purchase.model.PurchaseEvent;
+import ru.example.purchase.model.PurchaseState;
 
 import java.util.Random;
 
@@ -38,7 +38,7 @@ public class PurchaseEventListener {
     public void handlePurchaseRejected(String event) throws InterruptedException, JsonProcessingException {
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
-        System.out.printf("--------> Обновляем статус покупки. Покупка отменена успешно accountId:%d purchaseId:%d  %n",
+        System.out.printf("--------> Обновляем статус покупки. Покупка отклонена. Аккаунт не существует или на нем не достаточно средств accountId:%d purchaseId:%d  %n",
                 purchaseEvent.getAccountId(),
                 purchaseEvent.getPurchaseId());
 

@@ -1,4 +1,4 @@
-package ru.example.service;
+package ru.example.purchase.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,12 +6,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.example.exception.PurchaseCanNotBeCanceledException;
-import ru.example.exception.PurchaseDoesNotExistException;
-import ru.example.exception.SendDataToKafkaException;
-import ru.example.model.*;
-import ru.example.repository.PurchaseRepository;
-import ru.example.sender.DataSender;
+import ru.example.purchase.exception.PurchaseCanNotBeCanceledException;
+import ru.example.purchase.exception.PurchaseDoesNotExistException;
+import ru.example.purchase.exception.SendDataToKafkaException;
+import ru.example.purchase.model.*;
+import ru.example.purchase.repository.PurchaseRepository;
+import ru.example.purchase.sender.DataSender;
 
 import java.util.Map;
 import java.util.Random;

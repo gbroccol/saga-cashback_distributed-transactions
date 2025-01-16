@@ -1,4 +1,4 @@
-package ru.example.exception;
+package ru.example.purchase.exception;
 
 public class PurchaseCanNotBeCanceledException extends RuntimeException {
     public PurchaseCanNotBeCanceledException(String message) {

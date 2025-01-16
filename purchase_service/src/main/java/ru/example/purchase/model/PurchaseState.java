@@ -1,4 +1,4 @@
-package ru.example.model;
+package ru.example.purchase.model;
 
 public enum PurchaseState {
 

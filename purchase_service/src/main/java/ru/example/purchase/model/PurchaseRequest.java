@@ -1,15 +1,13 @@
-package ru.example.model;
+package ru.example.purchase.model;
 
 import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
-public class PurchaseEvent { // todo record
+public class PurchaseRequest {
 
     private Long accountId;
-
-    private Long purchaseId;
-
+    private String productName;
     private BigDecimal amount;
 }

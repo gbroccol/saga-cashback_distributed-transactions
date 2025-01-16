@@ -1,4 +1,4 @@
-package ru.example.exception;
+package ru.example.account.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
