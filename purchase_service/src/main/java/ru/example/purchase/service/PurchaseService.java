@@ -42,8 +42,7 @@ public class PurchaseService {
         simulateDelay();
 
         if (ThreadLocalRandom.current().nextInt(1, 4) == 3) {
-            log.info("Random error - error while sending msg (purchase id:{}) to kafka...", purchase.getId());
-            throw new SendDataToKafkaException("error while sending data to kafka (RANDOM ERROR)");
+            throw new SendDataToKafkaException("error while sending data to kafka (random error)");
         }
 
         PurchaseEvent event = new PurchaseEvent(purchase.getAccountId(), purchase.getId(), purchase.getAmount());
@@ -60,12 +59,12 @@ public class PurchaseService {
         simulateDelay();
 
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(
-                () -> new PurchaseDoesNotExistException("Покупка не найдена"));
+                () -> new PurchaseDoesNotExistException(String.format("purchase does not exist (purchase_id:%d)", id)));
 
         if (purchase.getState() == PurchaseState.CANCELING || purchase.getState() == PurchaseState.CANCELED) {
             return new PurchaseResponse(purchase.getId(), purchase.getState());
         } else if (purchase.getState() != PurchaseState.CREATED) {
-            throw new PurchaseCanNotBeCanceledException("Операция может быть отменена только если находится в статусе CREATED");
+            throw new PurchaseCanNotBeCanceledException("purchase can't be canceled, if its status is not 'created'");
         }
 
         purchase.setState(PurchaseState.CANCELING);
@@ -82,14 +81,14 @@ public class PurchaseService {
     public PurchaseResponse get(Long id) {
 
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(
-                () -> new PurchaseDoesNotExistException("Покупка не найдена"));
+                () -> new PurchaseDoesNotExistException(String.format("purchase does not exist (purchase_id:%d)", id)));
 
         return new PurchaseResponse(purchase.getId(), purchase.getState());
     }
 
     public void setState(Long id, PurchaseState purchaseState) {
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Покупка не найдена"));
+                () -> new PurchaseDoesNotExistException(String.format("purchase does not exist (purchase_id:%d)", id)));
         purchase.setState(purchaseState);
         purchaseRepository.save(purchase);
     }

@@ -61,7 +61,7 @@ public class AccountService {
     @Transactional
     public void addCashBack(Long accountId, BigDecimal amount) throws AccountDoesNotExistException {
         Account account = accountRepository.findById(accountId).orElseThrow(
-                () -> new AccountDoesNotExistException(String.format("error - account does not exists (account_id:%d)", accountId)));
+                () -> new AccountDoesNotExistException(String.format("account does not exists (account_id:%d)", accountId)));
         account.setCashback(account.getCashback().add(
                 amount.multiply(cashBackRate.divide(hundred, 4, RoundingMode.HALF_UP))
         ));
@@ -71,7 +71,7 @@ public class AccountService {
     @Transactional
     public void cancelPurchase(Long accountId, BigDecimal amount) throws AccountDoesNotExistException {
         Account account = accountRepository.findById(accountId).orElseThrow(
-                () -> new AccountDoesNotExistException(String.format("error - account does not exists (account_id:%d)", accountId)));
+                () -> new AccountDoesNotExistException(String.format("account does not exists (account_id:%d)", accountId)));
         refundMoney(account, amount);
         cancelCashBack(account, amount);
     }
