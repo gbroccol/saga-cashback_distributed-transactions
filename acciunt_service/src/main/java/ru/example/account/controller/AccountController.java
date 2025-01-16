@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.example.account.exception.AccountDoesNotExistException;
 import ru.example.account.model.AccountRequest;
 import ru.example.account.model.AccountResponse;
 import ru.example.account.service.AccountService;
@@ -22,6 +23,10 @@ public class AccountController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AccountResponse> getAccount(@PathVariable Long id) {
-        return new ResponseEntity<>(accountService.getAccount(id), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(accountService.getAccount(id), HttpStatus.OK);
+        } catch (AccountDoesNotExistException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }
