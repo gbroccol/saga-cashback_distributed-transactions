@@ -10,14 +10,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(AccountDoesNotExistException.class)
-    public ResponseEntity<ErrorMessage> exception(AccountDoesNotExistException e) {
-        return new ResponseEntity<>(new ErrorMessage(e.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(NotEnoughMoneyException.class)
-    public ResponseEntity<ErrorMessage> exception(NotEnoughMoneyException e) {
+    @ExceptionHandler(InitBalanceLessThanZeroException.class)
+    public ResponseEntity<ErrorMessage> exception(InitBalanceLessThanZeroException e) {
         return new ResponseEntity<>(new ErrorMessage(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
