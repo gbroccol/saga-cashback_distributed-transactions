@@ -1,6 +1,6 @@
 package ru.example.exception;
 
-public class NotEnoughMoneyException extends RuntimeException {
+public class NotEnoughMoneyException extends Exception {
     public NotEnoughMoneyException(String message) {
         super(message);
     }
