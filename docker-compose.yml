@@ -3,7 +3,7 @@ services:
   postgres-purchase:
     image: postgres:14.8-alpine3.18
     environment:
-      POSTGRES_DB: "saga" # todo rename purchase
+      POSTGRES_DB: "saga" # todo rename purchase (нужны 2 БД)
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
     volumes:

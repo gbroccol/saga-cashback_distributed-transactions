@@ -19,16 +19,14 @@ public class DataSenderKafka implements DataSender {
     }
 
     @Override
-    public void send(Long id, String msg) throws SendDataToKafkaException { // todo оставить одно поле
-
+    public void send(String msg) throws SendDataToKafkaException {
         try {
-            log.info("sending msg (message id:{}) to kafka...", id);
+            log.info("sending msg (message:{}) to kafka...", msg);
             var result = kafkaTemplate.send(topic, msg).get();
-            log.info("msg (message id:{}) was sent to topic:{}, offset:{}", id, topic, result.getRecordMetadata().offset());
+            log.info("msg (message:{}) was sent to topic:{}, offset:{}", msg, topic, result.getRecordMetadata().offset());
         } catch (ExecutionException | InterruptedException ex) {
-            log.error("error, msg (message id:{}) was not sent to topic:{}", id, topic, ex);
+            log.error("error, msg (message:{}) was not sent to topic:{}", msg, topic, ex);
             throw new SendDataToKafkaException(ex.getMessage());
         }
-
     }
 }

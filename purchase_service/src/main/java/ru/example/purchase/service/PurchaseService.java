@@ -47,7 +47,7 @@ public class PurchaseService {
         }
 
         PurchaseEvent event = new PurchaseEvent(purchase.getAccountId(), purchase.getId(), purchase.getAmount());
-        dataSenders.get("purchaseCreating").send(purchase.getId(), objectMapper.writeValueAsString(event));
+        dataSenders.get("purchaseCreating").send(objectMapper.writeValueAsString(event));
 
         simulateDelay();
 
@@ -72,7 +72,7 @@ public class PurchaseService {
         purchase = purchaseRepository.save(purchase);
 
         PurchaseEvent event = new PurchaseEvent(purchase.getAccountId(), purchase.getId(), purchase.getAmount());
-        dataSenders.get("purchaseCanceling").send(purchase.getId(), objectMapper.writeValueAsString(event));
+        dataSenders.get("purchaseCanceling").send(objectMapper.writeValueAsString(event));
 
         simulateDelay();
 

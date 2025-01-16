@@ -35,12 +35,12 @@ public class PurchaseEventListener {
             // вычитаем сумму из баланса
             accountService.withdrawMoney(purchaseEvent.accountId(), purchaseEvent.amount());
         } catch (AccountDoesNotExistException | NotEnoughMoneyException e) {
-            dataSenders.get("purchaseRejected").send(1L, objectMapper.writeValueAsString(purchaseEvent)); // todo переменные // todo 1L
+            dataSenders.get("purchaseRejected").send(objectMapper.writeValueAsString(purchaseEvent));
             return;
         }
 
         // добавить событие в очередь успешных операций
-        dataSenders.get("purchaseCreated").send(1L, objectMapper.writeValueAsString(purchaseEvent));
+        dataSenders.get("purchaseCreated").send(objectMapper.writeValueAsString(purchaseEvent));
 
         simulateDelay();
     }
@@ -87,7 +87,7 @@ public class PurchaseEventListener {
         }
 
         // Добавить событие в очередь операций, которые были успешно отменены
-        dataSenders.get("purchaseCanceled").send(1L, objectMapper.writeValueAsString(purchaseEvent));
+        dataSenders.get("purchaseCanceled").send(objectMapper.writeValueAsString(purchaseEvent));
 
         simulateDelay();
     }
