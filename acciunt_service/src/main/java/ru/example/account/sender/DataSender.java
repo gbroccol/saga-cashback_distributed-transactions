@@ -1,6 +1,6 @@
-package ru.example.sender;
+package ru.example.account.sender;
 
-import ru.example.exception.SendDataToKafkaException;
+import ru.example.account.exception.SendDataToKafkaException;
 
 public interface DataSender {
     void send(Long id, String value) throws SendDataToKafkaException;
