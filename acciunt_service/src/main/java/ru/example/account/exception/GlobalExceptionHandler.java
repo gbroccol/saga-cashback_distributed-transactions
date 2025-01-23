@@ -15,4 +15,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorMessage(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(AccountDoesNotExistException.class)
+    public ResponseEntity<ErrorMessage> exception(AccountDoesNotExistException e) {
+        return new ResponseEntity<>(new ErrorMessage(e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
 }

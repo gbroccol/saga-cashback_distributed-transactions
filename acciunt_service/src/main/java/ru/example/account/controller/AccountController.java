@@ -22,11 +22,7 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AccountResponse> getAccount(@PathVariable Long id) {
-        try {
-            return new ResponseEntity<>(accountService.getAccount(id), HttpStatus.OK);
-        } catch (AccountDoesNotExistException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    public ResponseEntity<AccountResponse> getAccount(@PathVariable Long id) throws AccountDoesNotExistException {
+        return new ResponseEntity<>(accountService.getAccount(id), HttpStatus.OK);
     }
 }

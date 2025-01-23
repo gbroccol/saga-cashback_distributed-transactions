@@ -22,20 +22,12 @@ public class PurchaseController {
     }
 
     @PostMapping
-    public ResponseEntity<PurchaseResponse> createPurchase(@RequestBody PurchaseRequest request) {
-        try {
-            return new ResponseEntity<>(purchaseService.create(request), HttpStatus.CREATED);
-        } catch (JsonProcessingException | InterruptedException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<PurchaseResponse> createPurchase(@RequestBody PurchaseRequest request) throws JsonProcessingException, InterruptedException {
+        return new ResponseEntity<>(purchaseService.create(request), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<PurchaseResponse> cancelPurchase(@PathVariable Long id) {
-        try {
-            return new ResponseEntity<>(purchaseService.cancel(id), HttpStatus.OK);
-        } catch (JsonProcessingException | InterruptedException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ResponseEntity<PurchaseResponse> cancelPurchase(@PathVariable Long id) throws JsonProcessingException, InterruptedException {
+        return new ResponseEntity<>(purchaseService.cancel(id), HttpStatus.OK);
     }
 }
