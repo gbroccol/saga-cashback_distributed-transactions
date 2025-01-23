@@ -14,48 +14,12 @@ import java.util.Random;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class PurchaseEventListener {
+public class PurchaseCanceledEventListener {
 
     private static final Integer MAX_DELAY_MILLISECONDS = 5_000;
 
     private final ObjectMapper objectMapper;
     private final PurchaseService purchaseService;
-
-    @KafkaListener(topics = "purchase_created", groupId = "purchase-group")
-    public void handlePurchaseCreated(String event) throws InterruptedException, JsonProcessingException {
-
-        // todo нужно обрабатывать случай, если транзакция с запросом на покупку не завершена
-
-        PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
-        log.info("Обновляем статус покупки. Покупка прошла успешно accountId:{} purchaseId:{}",
-                purchaseEvent.accountId(),
-                purchaseEvent.purchaseId());
-
-        simulateDelay();
-
-        // обновить статус
-        purchaseService.updateState(purchaseEvent.purchaseId(), PurchaseState.CREATED);
-
-        simulateDelay();
-    }
-
-    @KafkaListener(topics = "purchase_rejected", groupId = "purchase-group")
-    public void handlePurchaseRejected(String event) throws InterruptedException, JsonProcessingException {
-
-        // todo нужно обрабатывать случай, если транзакция с запросом на покупку не завершена
-
-        PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
-        log.info("Обновляем статус покупки. Покупка отклонена. Аккаунт не существует или на нем не достаточно средств accountId:{} purchaseId:{}",
-                purchaseEvent.accountId(),
-                purchaseEvent.purchaseId());
-
-        simulateDelay();
-
-        // обновить статус
-        purchaseService.updateState(purchaseEvent.purchaseId(), PurchaseState.REJECTED);
-
-        simulateDelay();
-    }
 
     @KafkaListener(topics = "purchase_canceled", groupId = "purchase-group")
     public void handlePurchaseCanceled(String event) throws InterruptedException, JsonProcessingException {
