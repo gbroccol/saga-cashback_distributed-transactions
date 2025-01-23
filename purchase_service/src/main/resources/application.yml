@@ -25,6 +25,10 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: purchase-group
+      auto-offset-reset: earliest
+
   jpa:
     hibernate:
       ddl-auto: create
