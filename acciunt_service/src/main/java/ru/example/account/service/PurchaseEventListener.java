@@ -3,29 +3,32 @@ package ru.example.account.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import ru.example.account.config.DataSendingConfig;
 import ru.example.account.exception.AccountDoesNotExistException;
 import ru.example.account.exception.NotEnoughMoneyException;
 import ru.example.account.model.PurchaseEvent;
 import ru.example.account.sender.DataSender;
 
-import java.util.Map;
 import java.util.Random;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class PurchaseEventListener {
 
-    private final ObjectMapper objectMapper;
     private final AccountService accountService;
-    private final Map<String, DataSender> dataSenders;
+    private final ObjectMapper objectMapper;
+    private final DataSender dataSender;
+    private final DataSendingConfig dataSendingConfig;
 
     @KafkaListener(topics = "purchase_creating", groupId = "account-group")
     public void handlePurchaseCreating(String event) throws InterruptedException, JsonProcessingException {
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
-        System.out.printf("--------> Обработка покупки. Вычитаем денежные средства за покупку accountId:%d purchaseId:%d  %n",
+        log.info("Обработка покупки. Вычитаем денежные средства за покупку accountId:{} purchaseId:{}",
                 purchaseEvent.accountId(),
                 purchaseEvent.purchaseId());
 
@@ -35,12 +38,12 @@ public class PurchaseEventListener {
             // вычитаем сумму из баланса
             accountService.withdrawMoney(purchaseEvent.accountId(), purchaseEvent.amount());
         } catch (AccountDoesNotExistException | NotEnoughMoneyException e) {
-            dataSenders.get("purchaseRejected").send(objectMapper.writeValueAsString(purchaseEvent));
+            dataSender.send(dataSendingConfig.topicPurchaseRejected, objectMapper.writeValueAsString(purchaseEvent));
             return;
         }
 
         // добавить событие в очередь успешных операций
-        dataSenders.get("purchaseCreated").send(objectMapper.writeValueAsString(purchaseEvent));
+        dataSender.send(dataSendingConfig.topicPurchaseCreated, objectMapper.writeValueAsString(purchaseEvent));
 
         simulateDelay();
     }
@@ -52,7 +55,7 @@ public class PurchaseEventListener {
 
         simulateDelay();
 
-        System.out.printf("--------> Обработка покупки. Начисляем кэшбэк за покупку accountId:%d purchaseId:%d  %n",
+        log.info("Обработка покупки. Начисляем кэшбэк за покупку accountId:{} purchaseId:{}",
                 purchaseEvent.accountId(),
                 purchaseEvent.purchaseId());
 
@@ -61,6 +64,7 @@ public class PurchaseEventListener {
             accountService.addCashBack(purchaseEvent.accountId(), purchaseEvent.amount());
         } catch (AccountDoesNotExistException e) {
             // todo можно закидывать в очередь и попробовать обработать позже или как такое лучше обрабатывать???
+            log.error("can't create purchase - account does not exist");
             throw new RuntimeException(e);
         }
 
@@ -74,7 +78,7 @@ public class PurchaseEventListener {
 
         simulateDelay();
 
-        System.out.printf("--------> Обработка отмены покупки. Возвращаем списанные средства и отменяем начисление кэшбэка accountId:%d purchaseId:%d %n",
+        log.info("Обработка отмены покупки. Возвращаем списанные средства и отменяем начисление кэшбэка accountId:{} purchaseId:{}",
                 purchaseEvent.accountId(),
                 purchaseEvent.purchaseId());
 
@@ -83,11 +87,12 @@ public class PurchaseEventListener {
             accountService.cancelPurchase(purchaseEvent.accountId(), purchaseEvent.amount());
         } catch (AccountDoesNotExistException e) {
             // todo можно закидывать в очередь и попробовать обработать позже или как такое лучше обрабатывать???
+            log.error("can't cancel purchase - account does not exist");
             return;
         }
 
         // Добавить событие в очередь операций, которые были успешно отменены
-        dataSenders.get("purchaseCanceled").send(objectMapper.writeValueAsString(purchaseEvent));
+        dataSender.send(dataSendingConfig.topicPurchaseCanceled, objectMapper.writeValueAsString(purchaseEvent));
 
         simulateDelay();
     }

@@ -3,6 +3,7 @@ package ru.example.purchase.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import ru.example.purchase.model.PurchaseEvent;
@@ -10,6 +11,7 @@ import ru.example.purchase.model.PurchaseState;
 
 import java.util.Random;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class PurchaseEventListener {
@@ -21,7 +23,7 @@ public class PurchaseEventListener {
     public void handlePurchaseCreated(String event) throws InterruptedException, JsonProcessingException {
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
-        System.out.printf("--------> Обновляем статус покупки. Покупка прошла успешно accountId:%d purchaseId:%d  %n",
+        log.info("Обновляем статус покупки. Покупка прошла успешно accountId:{} purchaseId:{}",
                 purchaseEvent.accountId(),
                 purchaseEvent.purchaseId());
 
@@ -37,7 +39,7 @@ public class PurchaseEventListener {
     public void handlePurchaseRejected(String event) throws InterruptedException, JsonProcessingException {
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
-        System.out.printf("--------> Обновляем статус покупки. Покупка отклонена. Аккаунт не существует или на нем не достаточно средств accountId:%d purchaseId:%d  %n",
+        log.info("Обновляем статус покупки. Покупка отклонена. Аккаунт не существует или на нем не достаточно средств accountId:{} purchaseId:{}",
                 purchaseEvent.accountId(),
                 purchaseEvent.purchaseId());
 
@@ -53,7 +55,7 @@ public class PurchaseEventListener {
     public void handlePurchaseCanceled(String event) throws InterruptedException, JsonProcessingException {
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
-        System.out.printf("--------> Обновляем статус покупки. Покупка отменена успешно accountId:%d purchaseId:%d  %n",
+        log.info("Обновляем статус покупки. Покупка отменена успешно accountId:{} purchaseId:{}",
                 purchaseEvent.accountId(),
                 purchaseEvent.purchaseId());
 

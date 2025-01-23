@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.example.purchase.config.DataSendingConfig;
 import ru.example.purchase.exception.PurchaseCanNotBeCanceledException;
 import ru.example.purchase.exception.PurchaseDoesNotExistException;
 import ru.example.purchase.exception.SendDataToKafkaException;
@@ -13,7 +14,6 @@ import ru.example.purchase.model.*;
 import ru.example.purchase.repository.PurchaseRepository;
 import ru.example.purchase.sender.DataSender;
 
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -22,9 +22,10 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class PurchaseService {
 
-    private final ObjectMapper objectMapper;
     private final PurchaseRepository purchaseRepository;
-    private final Map<String, DataSender> dataSenders;
+    private final ObjectMapper objectMapper;
+    private final DataSender dataSender;
+    private final DataSendingConfig dataSendingConfig;
 
     @Transactional
     public PurchaseResponse create(PurchaseRequest purchaseRequest) throws SendDataToKafkaException, JsonProcessingException, InterruptedException {
@@ -46,7 +47,7 @@ public class PurchaseService {
         }
 
         PurchaseEvent event = new PurchaseEvent(purchase.getAccountId(), purchase.getId(), purchase.getAmount());
-        dataSenders.get("purchaseCreating").send(objectMapper.writeValueAsString(event));
+        dataSender.send(dataSendingConfig.topicPurchaseCreating, objectMapper.writeValueAsString(event));
 
         simulateDelay();
 
@@ -71,7 +72,7 @@ public class PurchaseService {
         purchase = purchaseRepository.save(purchase);
 
         PurchaseEvent event = new PurchaseEvent(purchase.getAccountId(), purchase.getId(), purchase.getAmount());
-        dataSenders.get("purchaseCanceling").send(objectMapper.writeValueAsString(event));
+        dataSender.send(dataSendingConfig.topicPurchaseCanceling, objectMapper.writeValueAsString(event));
 
         simulateDelay();
 
