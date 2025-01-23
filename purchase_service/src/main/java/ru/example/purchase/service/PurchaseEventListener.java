@@ -16,11 +16,15 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class PurchaseEventListener {
 
+    private static final Integer MAX_DELAY_MILLISECONDS = 5_000;
+
     private final ObjectMapper objectMapper;
     private final PurchaseService purchaseService;
 
     @KafkaListener(topics = "purchase_created", groupId = "purchase-group")
     public void handlePurchaseCreated(String event) throws InterruptedException, JsonProcessingException {
+
+        // todo нужно обрабатывать случай, если транзакция с запросом на покупку не завершена
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
         log.info("Обновляем статус покупки. Покупка прошла успешно accountId:{} purchaseId:{}",
@@ -30,13 +34,15 @@ public class PurchaseEventListener {
         simulateDelay();
 
         // обновить статус
-        purchaseService.setState(purchaseEvent.purchaseId(), PurchaseState.CREATED);
+        purchaseService.updateState(purchaseEvent.purchaseId(), PurchaseState.CREATED);
 
         simulateDelay();
     }
 
     @KafkaListener(topics = "purchase_rejected", groupId = "purchase-group")
     public void handlePurchaseRejected(String event) throws InterruptedException, JsonProcessingException {
+
+        // todo нужно обрабатывать случай, если транзакция с запросом на покупку не завершена
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
         log.info("Обновляем статус покупки. Покупка отклонена. Аккаунт не существует или на нем не достаточно средств accountId:{} purchaseId:{}",
@@ -46,13 +52,16 @@ public class PurchaseEventListener {
         simulateDelay();
 
         // обновить статус
-        purchaseService.setState(purchaseEvent.purchaseId(), PurchaseState.REJECTED);
+        purchaseService.updateState(purchaseEvent.purchaseId(), PurchaseState.REJECTED);
 
         simulateDelay();
     }
 
     @KafkaListener(topics = "purchase_canceled", groupId = "purchase-group")
     public void handlePurchaseCanceled(String event) throws InterruptedException, JsonProcessingException {
+
+        // todo может перезатереться на cancelling, зависит от порядки фиксации транзакций (можно добавить for update в select)
+        // todo ловлю иногда ошибку - не отменяется начисление кешбека
 
         PurchaseEvent purchaseEvent = objectMapper.readValue(event, PurchaseEvent.class);
         log.info("Обновляем статус покупки. Покупка отменена успешно accountId:{} purchaseId:{}",
@@ -62,14 +71,14 @@ public class PurchaseEventListener {
         simulateDelay();
 
         // обновить статус
-        purchaseService.setState(purchaseEvent.purchaseId(), PurchaseState.CANCELED);
+        purchaseService.updateState(purchaseEvent.purchaseId(), PurchaseState.CANCELED);
 
         simulateDelay();
     }
 
     private void simulateDelay() throws InterruptedException {
-        int delay = new Random().nextInt(5_000); // do 5 sec
-        System.out.println("Идет расчет в бухгалтерии который займет " + delay + "секунд");
+        int delay = new Random().nextInt(MAX_DELAY_MILLISECONDS);
+        log.info("Идет расчет в банке который хранит твою денежку ждать {} секунд", delay);
         Thread.sleep(delay);
     }
 }
